@@ -152,13 +152,14 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Mac OS
+# Add by Fujihara
 *.DS_Store
 *.zip
 00_try_tools/
 *.mov
 *.bin
 *.safetensors
+/mypy.ini
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
