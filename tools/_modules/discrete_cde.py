@@ -10,7 +10,7 @@ from .vector_field import Func
 
 class DiscreteCDECell(eqx.Module, strict=True):
     mlp: Func
-    
+
     def __init__(
         self,
         input_size: int,
@@ -29,15 +29,15 @@ class DiscreteCDECell(eqx.Module, strict=True):
     ):
         xi0, xi1 = xi
         h_f = self.mlp(None, yi0)
-        yi1 = yi0 - h_f @ (xi1 - xi0)
+        yi1 = yi0 + h_f @ (xi1 - xi0)
         return yi1
 
 class DiscreteCDELayer(eqx.Module):
     cell: DiscreteCDECell
-    
+
     def __init__(self, input_size: int, hidden_size: int, width_size: int, depth: int, *, key: PRNGKeyArray):
         self.cell = DiscreteCDECell(input_size, hidden_size, width_size, depth, key=key)
-        
+
     def __call__(self, y0: Array, xs1: Array, key: Optional[jax.random.PRNGKey] = None):
         def _f(carry, xs):
             carry = self.cell(xs, carry)
