@@ -8,7 +8,8 @@ def test_module(seed: int = 5678, dataset_size:int = 256, length:int = 100, add_
     key = jr.PRNGKey(seed)
     ckey, nkey=  jr.split(key, 2)
 
-    ts, ys, coeffs, labels, in_size = datasets.make_2dspiral_dataset(dataset_size=dataset_size, length=length, add_noise=add_noise, key=ckey)
+    dataset = datasets.SpiralDataset(dataset_size=dataset_size, length=length, add_noise=add_noise, key=ckey)
+    ts, ys, coeffs, labels, in_size = dataset.make_dataset()
     spiral_dataset = (ts, ys, labels)
 
     fig = plt.figure(figsize=(16, 8))
