@@ -160,6 +160,7 @@ cython_debug/
 *.bin
 *.safetensors
 /mypy.ini
+/dataset
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
