@@ -17,7 +17,7 @@ class BaseDataset():
     def __init__(self):
         pass
 
-    def make_dataset(self) -> Tuple[Sequence[Float], Sequence[Array], Sequence[Array], Sequence[Float], int]:
+    def make_dataset(self) -> Tuple[Sequence[Array], Sequence[Array], Sequence[Array], Sequence[Array], int]:
         dataset_size = 256
         sequence_length = 100
         channels = 2
@@ -25,7 +25,7 @@ class BaseDataset():
         ys = jnp.zeros((dataset_size, sequence_length, channels+1))
         coeffs = [jnp.zeros((dataset_size, sequence_length-1, channels+1)) for _ in jnp.arange(4)]
         labels = jnp.zeros((dataset_size,))
-        in_size = ys[0][0]
+        _, _, in_size = ys.shape
         return ts, ys, coeffs, labels, in_size
     
 class SpiralDataset(BaseDataset):
@@ -36,7 +36,7 @@ class SpiralDataset(BaseDataset):
         self.add_noise = add_noise
         self.key = key
 
-    def make_dataset(self) -> Tuple[Sequence[Float], Sequence[Array], Sequence[Array], Sequence[Float], int]:
+    def make_dataset(self) -> Tuple[Sequence[Array], Sequence[Array], Sequence[Array], Sequence[Array], int]:
         """
             二次元の時計回り/反時計回り渦のデータを作成. ラベルは時計回りか反時計回りかの二値ラベル.
         """
@@ -92,7 +92,7 @@ class MNISTStrokeDataset(BaseDataset):
         self.mode_train = mode_train
         self.config = MNISTStrokeDatasetConfig()
 
-    def make_dataset(self) -> Tuple[Sequence[Float], Sequence[Array], Sequence[Array], Sequence[Float], int]:
+    def make_dataset(self) -> Tuple[Sequence[Array], Sequence[Array], Sequence[Array], Sequence[Array], int]:
         # データセットの読み込み
         if self.mode_train:
             path_list_data_input_sequence = glob.glob(self.config.train_data_input_sequence, recursive=True)
@@ -109,7 +109,7 @@ class MNISTStrokeDataset(BaseDataset):
         ts = []
         for filepath in tqdm(path_list_data_input_sequence[:dataset_size]):
             with open(filepath) as f:
-                lines = [[jnp.int32(x) for x in row] for row in csv.reader(f, delimiter=' ')]
+                lines = [[jnp.float32(x) for x in row] for row in csv.reader(f, delimiter=' ')]
                 ts.append(jnp.arange(len(lines)))
                 _ys = jnp.asarray(lines)
                 ys.append(jnp.concatenate([ts[-1][:, None], _ys], axis=-1))
@@ -121,7 +121,8 @@ class MNISTStrokeDataset(BaseDataset):
     
         # ラベルデータの読み込み
         with open(path_label) as f:
-            labels = [[jnp.int32(x) for x in row] for row in csv.reader(f, delimiter=' ')]
+            labels = [[jnp.float32(x) for x in row] for row in csv.reader(f, delimiter=' ')]
+        labels = jnp.array(labels)
     
         # データのチャネル数を取得
         in_size = len(ys[0][0])
