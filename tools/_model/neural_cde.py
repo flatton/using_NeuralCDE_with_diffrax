@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 
 import equinox as eqx  # https://github.com/patrick-kidger/equinox
 import diffrax
@@ -18,15 +18,17 @@ class NeuralCDE(eqx.Module):
     initial: eqx.nn.MLP
     func: Func
     linear: eqx.nn.Linear
+    activation_output: Callable
 
-    def __init__(self, in_size, out_size, hidden_size, width_size, depth, *, key, **kwargs):
+    def __init__(self, in_size: int, out_size: int, hidden_size: int, width_size: int, depth: int, *, key: PRNGKeyArray, **kwargs):
         super().__init__(**kwargs)
         ikey, fkey, lkey = jr.split(key, 3) # 乱数生成キーを分割し, 独立した新たなキーを作成
         self.initial = eqx.nn.MLP(in_size, hidden_size, width_size, depth, key=ikey) # 初期条件のモデルを初期化
         self.func = Func(in_size, hidden_size, width_size, depth, key=fkey) # ベクトル場のモデルを初期化
         self.linear = eqx.nn.Linear(hidden_size, out_size, key=lkey) # 出力層のモデルを初期化
+        self.activation_output = jnn.sigmoid if out_size == 1 else jnn.log_softmax
 
-    def __call__(self, ts, coeffs, evolving_out=False) -> Array:
+    def __call__(self, ts: Array, coeffs: Array, evolving_out=False) -> Array:
         # Each sample of data consists of some timestamps `ts`, and some `coeffs`
         # parameterising a control path. These are used to produce a continuous-time
         # input path `control`.
@@ -50,7 +52,7 @@ class NeuralCDE(eqx.Module):
             saveat=saveat,
         ) # 微分方程式の解を計算
         if evolving_out:
-            probs = jax.vmap(lambda y: jnn.sigmoid(self.linear(y))[0])(solution.ys)
+            probs = jax.vmap(lambda y: self.activation_output(self.linear(y))[0])(solution.ys)
         else:
-            (probs,) = jnn.sigmoid(self.linear(solution.ys[-1]))
+            probs = self.activation_output(self.linear(solution.ys[-1]))
         return probs

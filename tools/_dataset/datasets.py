@@ -115,13 +115,17 @@ class MNISTStrokeDataset(BaseDataset):
                 ys.append(jnp.concatenate([ts[-1][:, None], _ys], axis=-1))
     
         # 欠損値ありのデータ用の補間関数: Hermite cubic splines with backward differences
-        coeffs = []
+        coeffs = [[], [], [], []]
         for _ts, _ys in zip(ts, ys):
-            coeffs.append(diffrax.backward_hermite_coefficients(_ts, _ys))
+            _coeffs = diffrax.backward_hermite_coefficients(_ts, _ys)
+            for i in jnp.arange(4):
+                coeffs[i].append(_coeffs[i])
+        coeffs = tuple(coeffs)
     
         # ラベルデータの読み込み
         with open(path_label) as f:
             labels = [[jnp.float32(x) for x in row] for row in csv.reader(f, delimiter=' ')]
+            labels = labels[:dataset_size]
         labels = jnp.array(labels)
     
         # データのチャネル数を取得

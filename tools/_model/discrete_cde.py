@@ -1,7 +1,8 @@
-from typing import Tuple, Optional
+from typing import Tuple, Callable, Optional
 
 import equinox as eqx  # https://github.com/patrick-kidger/equinox
 import jax
+import jax.nn as jnn
 import jax.lax as lax
 import jax.numpy as jnp
 import jax.random as jr
@@ -44,6 +45,7 @@ class RNN(eqx.Module):
     rnn: DiscreteCDELayer
     linear: eqx.nn.Linear
     bias: jax.Array
+    activation_output: Callable
 
     def __init__(self, in_size: int, out_size: int, hidden_size: int, width_size: int, depth: int, *, key: PRNGKeyArray):
         ikey, gkey, lkey = jr.split(key, 3)
@@ -54,6 +56,7 @@ class RNN(eqx.Module):
         
         self.linear = eqx.nn.Linear(hidden_size, out_size, use_bias=False, key=lkey)
         self.bias = jnp.zeros(out_size)
+        self.activation_output = jnn.sigmoid if out_size == 1 else jnn.log_softmax
 
     def __call__(self, xs: Array, key: Optional[PRNGKeyArray] = None) -> Array:
         x0 = xs[0,:]
@@ -61,5 +64,5 @@ class RNN(eqx.Module):
         yT, ys = self.rnn(y0, xs)
         logits = self.linear(yT)
         # sigmoid because we're performing binary classification
-        probs = jax.nn.sigmoid(logits + self.bias)
+        probs = self.activation_output(logits + self.bias)
         return probs
