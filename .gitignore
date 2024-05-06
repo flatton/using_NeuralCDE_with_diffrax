@@ -158,9 +158,13 @@ cython_debug/
 00_try_tools/
 *.mov
 *.bin
+*.eqx
 *.safetensors
 /mypy.ini
 /dataset
+/output/model
+/memray-results
+/draft
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

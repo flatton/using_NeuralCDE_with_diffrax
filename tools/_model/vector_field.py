@@ -3,17 +3,17 @@ from typing import Optional
 import equinox as eqx  # https://github.com/patrick-kidger/equinox
 import jax
 import jax.nn as jnn
-from jaxtyping import Array, PRNGKeyArray
+from jaxtyping import Float, Array, PRNGKeyArray
 
 class Func(eqx.Module):
-    """
-        ベクトル場を定義.
+    """Define vector fields.
+    ベクトル場を定義.
     """
     mlp: eqx.nn.MLP
     in_size: int
     hidden_size: int
 
-    def __init__(self, in_size, hidden_size, width_size, depth, *, key, **kwargs):
+    def __init__(self, in_size: int, hidden_size: int, width_size: int, depth: int, *, key: PRNGKeyArray, **kwargs):
         super().__init__(**kwargs)
         self.in_size = in_size
         self.hidden_size = hidden_size
@@ -30,5 +30,15 @@ class Func(eqx.Module):
             key=key,
         )
 
-    def __call__(self, t: Optional[Array], y: Array, args: Optional[Array] = None):
+    def __call__(self, t: Optional[Float[Array, ""]], y: Float[Array, "in_size"], args: Optional[Array] = None):
+        """Calcurate the vector fields $$f_\theta(y_i)$$.
+        ベクトル場の行列を算出.
+
+        **Arguments:**
+        - t: タイムスタンプ $$t_i$$
+        - y: 隠れ状態 $$y_i$$
+        
+        **Returns:**
+        - ベクトル場 $$f_\theta(y_i)$$
+        """
         return self.mlp(y).reshape(self.hidden_size, self.in_size)
