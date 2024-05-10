@@ -91,7 +91,6 @@ def experiment(
     return experiment_result
 
 def main() -> None:
-    #%%memray_flamegraph
     eqx.clear_caches()
     jax.clear_caches()
     gc.collect()
@@ -102,7 +101,7 @@ def main() -> None:
     config.dataset_size_train = -1
     config.dataset_size_test = -1
     
-    config.noise_ratio = 0.5
+    config.noise_ratio = 0.
     config.neural_model_name = 'NeuralCDE'
     
     date = datetime.datetime.now().strftime('%Y年%m月%d日-%H:%M:%S')

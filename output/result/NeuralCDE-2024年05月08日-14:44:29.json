@@ -1,0 +1,10 @@
+{
+    "train_time_avg": 1.070278286933899,
+    "test_loss_avg": 0.2323652058839798,
+    "test_acc_avg": 0.9296999573707581,
+    "test_time_avg": 0.00860597938299179,
+    "date": "2024年05月08日-14:44:29",
+    "neural_model_name": "NeuralCDE",
+    "interpolation": "cubic",
+    "noise_ratio": 0.0
+}

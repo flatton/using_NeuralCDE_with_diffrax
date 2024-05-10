@@ -14,7 +14,7 @@ tasks:
     experiment:
         desc: "This task trains and evaluates Neural Network models."
         cmds:
-            - python train_and_eval_models
+            - python train_and_eval_models.py
     test_modules:
         desc: "This task executes the module tests."
         cmds:

@@ -1,0 +1,10 @@
+{
+    "train_time_avg": 0.019971882924437523,
+    "test_loss_avg": 0.13497278094291687,
+    "test_acc_avg": 0.9589999914169312,
+    "test_time_avg": 0.0029102205298841,
+    "date": "2024年05月08日-19:52:16",
+    "neural_model_name": "RNN",
+    "interpolation": "cubic",
+    "noise_ratio": 0.0
+}
