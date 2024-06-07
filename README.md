@@ -4,3 +4,4 @@
 3. task initialize_output_direcrtories
 
 (test integration between notion and github)
+(test integration between notion and github)
