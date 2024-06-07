@@ -3,4 +3,4 @@
 2. task setup
 3. task initialize_output_direcrtories
 
-(testing...)
+(test integration between notion and github)
