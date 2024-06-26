@@ -160,9 +160,12 @@ cython_debug/
 *.bin
 *.safetensors
 /mypy.ini
-/dataset
 /memray-results
 /draft
+.jupyter
+.zed
+/train_and_eval_models.py
+/__init__.py
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
