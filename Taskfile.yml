@@ -1,26 +1,22 @@
-version: '3'
+version: "3"
 
 tasks:
-    setup:
-        desc: "This task sets up the experiment environment: installing poetry, task"
-        cmds:
-            - curl -sSL https://install.python-poetry.org | python3 -
-            - poetry install
-    initialize_output_direcrtories:
-        desc: "This task resets the `output` directory."
-        cmds:
-            - rm -r output
-            - mkdir -p output/{configuration,memray,model,result}
-    experiment:
-        desc: "This task trains and evaluates Neural Network models."
-        cmds:
-            - python train_and_eval_models.py
-    test_modules:
-        desc: "This task executes the module tests."
-        cmds:
-            - python -m tool._test_module.test_dataloader
-            - python -m tool._test_module.test_spiral_dataset
-    mypy:
-        desc: "This task executes mypy."
-        cmds:
-            - mypy ./tools
+  setup:
+    desc: "This task sets up the experiment environment: installing poetry, task"
+    cmds:
+      - curl -sSL https://install.python-poetry.org | python3 -
+      - poetry install
+  initialize_output_direcrtories:
+    desc: "This task resets the `output` directory."
+    cmds:
+      - rm -r output
+      - mkdir -p output/{configuration,memray,model,result}
+  test_modules:
+    desc: "This task executes the module tests."
+    cmds:
+      - python -m tool._test_module.test_dataloader
+      - python -m tool._test_module.test_spiral_dataset
+  mypy:
+    desc: "This task executes mypy."
+    cmds:
+      - mypy ./tools

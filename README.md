@@ -1,6 +1,4 @@
 # Set up
 1. brew install go-task
 2. task setup
-3. task initialize_output_direcrtories
-
-(test integration between notion and github)
+3. Download the dataset: https://edwin-de-jong.github.io/blog/mnist-sequence-data/
