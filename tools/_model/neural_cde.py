@@ -1,40 +1,64 @@
-from typing import Union, Tuple, Callable, Optional
+from typing import Callable, Optional, Tuple, Union
 
-import equinox as eqx  # https://github.com/patrick-kidger/equinox
 import diffrax
+import equinox as eqx  # https://github.com/patrick-kidger/equinox
 import jax
-import jax.nn as jnn
 import jax.lax as lax
+import jax.nn as jnn
 import jax.numpy as jnp
 import jax.random as jr
-from jaxtyping import Float, Array, PRNGKeyArray
+from jaxtyping import Array, Float, PRNGKeyArray
 
 from .vector_field import Func
 
+
 class NeuralCDE(eqx.Module):
     """
-        Neural CDE モデルを定義.
+    Neural CDE モデルを定義.
     """
+
     initial: eqx.nn.MLP
     func: Func
     linear: eqx.nn.Linear
     activation_output: Callable
     interpolation: str
 
-    def __init__(self, in_size: int, out_size: int, hidden_size: int, width_size: int, depth: int, *, interpolation: str = 'cubic', key: PRNGKeyArray, **kwargs):
+    def __init__(
+        self,
+        in_size: int,
+        out_size: int,
+        hidden_size: int,
+        width_size: int,
+        depth: int,
+        *,
+        interpolation: str = "cubic",
+        key: PRNGKeyArray,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
-        ikey, fkey, lkey = jr.split(key, 3) # 乱数生成キーを分割し, 独立した新たなキーを作成
+        ikey, fkey, lkey = jr.split(key, 3)  # 乱数生成キーを分割し, 独立した新たなキーを作成
         self.interpolation = interpolation
 
-        self.initial = eqx.nn.MLP(in_size, hidden_size, width_size, depth, key=ikey) # 初期条件のモデルを初期化
+        self.initial = eqx.nn.MLP(
+            in_size, hidden_size, width_size, depth, key=ikey
+        )  # 初期条件のモデルを初期化
 
-        self.func = Func(in_size, hidden_size, width_size, depth, key=fkey) # ベクトル場のモデルを初期化
+        self.func = Func(
+            in_size, hidden_size, width_size, depth, key=fkey
+        )  # ベクトル場のモデルを初期化
 
-        self.linear = eqx.nn.Linear(hidden_size, out_size, key=lkey) # 出力層のモデルを初期化
+        self.linear = eqx.nn.Linear(hidden_size, out_size, key=lkey)  # 出力層のモデルを初期化
         self.activation_output = jnn.sigmoid if out_size == 1 else jnn.log_softmax
 
-    def __call__(self, ts: Float[Array, "*sequence_length"], coeffs: Tuple[Float[Array, "*sequence_length channels+1"], ...], *, evolving_out: bool = False, key: Optional[PRNGKeyArray] = None) -> Union[Float[Array, "out_size"], Float[Array, "*sequence_length out_size"]]:
-        '''Solve contious controlled differential equations.
+    def __call__(
+        self,
+        ts: Float[Array, "*sequence_length"],
+        coeffs: Tuple[Float[Array, "*sequence_length channels+1"], ...],
+        *,
+        evolving_out: bool = False,
+        key: Optional[PRNGKeyArray] = None,
+    ) -> Union[Float[Array, "out_size"], Float[Array, "*sequence_length out_size"]]:
+        """Solve contious controlled differential equations.
         連続な制御微分方程式を解く.
 
         **Arguments:**
@@ -48,12 +72,12 @@ class NeuralCDE(eqx.Module):
         Each sample of data consists of some timestamps `ts`, and some `coeffs`
         parameterising a control path. These are used to produce a continuous-time
         input path `control`.
-        '''
+        """
 
         # 制御信号（パス）の生成
-        if self.interpolation == 'linear':
+        if self.interpolation == "linear":
             control = diffrax.LinearInterpolation(ts, coeffs, jump_ts=ts)
-        elif self.interpolation == 'cubic':
+        elif self.interpolation == "cubic":
             control = diffrax.CubicInterpolation(ts, coeffs)
 
         # Term の生成
@@ -81,7 +105,7 @@ class NeuralCDE(eqx.Module):
             dt0,
             y0,
             stepsize_controller=diffrax.PIDController(rtol=1e-3, atol=1e-6),
-            #adjoint=BacksolveAdjoint(), # If you want to reduce memory usage, turn on this.
+            # adjoint=BacksolveAdjoint(), # If you want to reduce memory usage, turn on this.
             saveat=saveat,
         )
 

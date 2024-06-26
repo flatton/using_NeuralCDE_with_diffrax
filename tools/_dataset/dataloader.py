@@ -1,11 +1,14 @@
-from typing import Union, Tuple, Sequence, Generator
+from typing import Generator, Sequence, Tuple, Union
 
 import jax
 import jax.numpy as jnp
 import jax.random as jr
-from jaxtyping import Float, Array, PRNGKeyArray
+from jaxtyping import Array, Float, PRNGKeyArray
 
-def dataloader(arrays: Tuple[Array, ...], batch_size: int, *, key: PRNGKeyArray) -> Generator[Tuple[Float[Array, "batchsize"], ...], None, None]:
+
+def dataloader(
+    arrays: Tuple[Array, ...], batch_size: int, *, key: PRNGKeyArray
+) -> Generator[Tuple[Float[Array, "batchsize"], ...], None, None]:
     """Data loader for data whose sequence length is constant.
     系列長が一定のデータに対するデータローダ.
 
@@ -31,7 +34,10 @@ def dataloader(arrays: Tuple[Array, ...], batch_size: int, *, key: PRNGKeyArray)
             start = end
             end = start + batch_size
 
-def dataloader_ununiformed_sequence(arrays: Tuple[Sequence[Union[int, float, Array]], ...], batch_size: int, *, key: PRNGKeyArray) -> Generator[Tuple[Float[Array, "batchsize"], ...], None, None]:
+
+def dataloader_ununiformed_sequence(
+    arrays: Tuple[Sequence[Union[int, float, Array]], ...], batch_size: int, *, key: PRNGKeyArray
+) -> Generator[Tuple[Float[Array, "batchsize"], ...], None, None]:
     """Data loader for data whose sequence length is constant.
     系列長が非一定のデータに対するデータローダ.
 
@@ -56,7 +62,7 @@ def dataloader_ununiformed_sequence(arrays: Tuple[Sequence[Union[int, float, Arr
             batch_perm = perm[start:end]
             batched_labels = labels[batch_perm]
             batched_data = tuple([x[idx] for idx in batch_perm] for x in data)
-            
+
             uniformed_data = tuple()
             for _batch in batched_data:
                 max_length = jnp.max(jnp.array([len(x) for x in _batch]))
